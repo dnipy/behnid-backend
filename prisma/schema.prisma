@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://admin:ninja2afm@localhost:5432/behtest"
+}
+
+
+// USER PART////////////
+model User {
+  id        Int           @id @default(autoincrement())
+  email     String?        @unique
+  phone     String        @unique
+  name      String? 
+  password  String 
+  Role      userRole      @default(Buyer)
+  profile   Profile?
+  products  Product[]     @relation()
+  commentsBlog  commentsForBlog[]
+  commentsProducts  commentsForProducts[]
+  requestsProducts   RequestOnProducts[]
+  freeRequests      FreeRequests[]
+}
+
+model Profile {
+  id              Int         @id @default(autoincrement())
+  user            User        @relation(fields: [userID],references: [id])
+  userID          Int         @unique
+  provienceID     Int          @default(0)
+  followers       Int          @default(0)
+  following       Int          @default(0)
+  name            String?      
+  family          String?
+  address         String?
+}
+
+
+
+//PRODUCT PART //////////////
+model Product {
+  id      Int         @id @default(autoincrement())
+  likes   Int         @default(0)
+  image   String?
+  title   String
+  describe  String
+  price     Int
+  addDate   DateTime  @default(now())
+  sendArea  String?
+  packType  packType  @default(vanet)
+  minOrder  Int
+  customerPrice   Int
+  producerPrice   Int
+  weight    String
+  deliveryTime  String
+  catID   Int?
+  authorID  Int    @unique
+  //relations
+  author  User        @relation(fields: [authorID],references: [id])
+  categorie Category[] @relation()
+  comments  commentsForProducts[]
+  requests   RequestOnProducts[]
+  images  ImagesOnProducts[]
+}
+
+
+//add reply for comments
+
+model commentsForProducts {
+  id  Int  @id @default(autoincrement())
+  productID   Int?
+  product   Product?    @relation(fields: [productID],references: [id])
+  AuthorID  Int?
+  commentAuthor   User?   @relation(fields: [AuthorID],references: [id])
+  message   String  @default("")
+}
+
+
+
+
+//Category PART//////
+model Category {
+  id    Int    @id @default(autoincrement())
+  name  String
+  subCat  SubCat[]
+  products Product[] @relation()
+  requests  FreeRequests[] @relation()
+}
+
+
+model SubCat {
+  id    Int    @id @default(autoincrement())
+  name  String
+  CatID   Int?
+  categories Category? @relation(fields: [CatID],references: [id])
+}
+
+
+
+//requests part//////////
+model RequestOnProducts {
+  id      Int         @id @default(autoincrement())
+  productID Int?
+  product   Product? @relation(fields: [productID],references: [id])
+  quantity    Int
+  AuthorID  Int
+  RequestAuthor   User   @relation(fields: [AuthorID],references: [id])
+  date  DateTime  @default(now())
+}
+
+model FreeRequests {
+  id      Int         @id @default(autoincrement())
+  date  DateTime  @default(now())
+  image   String?
+  name    String
+  describe  String
+  categoryID  Int
+  categorie Category[] @relation()
+  authorID  Int
+  Author  User  @relation(fields: [authorID],references: [id])
+  
+}
+
+model Connection {
+  id      Int         @id @default(autoincrement())
+}
+
+
+//blog part///////////////
+model Blog {
+  id      Int         @id @default(autoincrement())
+  title   String
+  describe  String
+  date  DateTime      @default(now())
+  likes   Int       @default(0)
+  //relations
+  images  imagesOnBlog[]
+  comments  commentsForBlog[]
+}
+
+
+model commentsForBlog {
+  id  Int  @id @default(autoincrement())
+  blogID   Int?
+  blog  Blog?   @relation(fields: [blogID],references: [id])
+  AuthorID  Int?
+  commentAuthor   User?   @relation(fields: [AuthorID],references: [id])
+  message   String  @default("")
+}
+
+
+
+//images
+
+model imagesOnBlog {
+  id  Int @id @default(autoincrement())
+  name String
+  url   String
+  FullUrl String @unique
+  blogID Int
+  blog  Blog    @relation(fields: [blogID],references: [id])
+}
+
+model ImagesOnProducts {
+  id  Int @id @default(autoincrement())
+  name String
+  url   String
+  FullUrl String @unique
+  productID Int
+  product   Product   @relation(fields: [productID],references: [id])
+}
+
+
+//enums and types/////////////////////////////////////////////////////////
+enum userRole {
+  Buyer
+  Seller
+}
+
+enum packType {
+  vanet
+  camiun
+  kg
+}
