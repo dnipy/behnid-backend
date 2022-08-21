@@ -55,7 +55,7 @@ model Product {
   weight    String
   deliveryTime  String
   catID   Int?
-  authorID  Int    @unique
+  authorID  Int    
   //relations
   author  User        @relation(fields: [authorID],references: [id])
   categorie Category[] @relation()
